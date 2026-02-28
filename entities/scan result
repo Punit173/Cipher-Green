@@ -1,0 +1,40 @@
+{
+  "name": "ScanResult",
+  "type": "object",
+  "properties": {
+    "image_url": {
+      "type": "string"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "biodegradable",
+        "recyclable",
+        "hazardous",
+        "unknown"
+      ]
+    },
+    "material": {
+      "type": "string"
+    },
+    "is_hazardous": {
+      "type": "boolean"
+    },
+    "is_recyclable": {
+      "type": "boolean"
+    },
+    "confidence": {
+      "type": "number"
+    },
+    "carbon_saved": {
+      "type": "number"
+    },
+    "item_name": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "category",
+    "carbon_saved"
+  ]
+}
