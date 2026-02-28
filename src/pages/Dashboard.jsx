@@ -2,16 +2,17 @@ import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Leaf, Recycle, ShieldAlert, BarChart3 } from 'lucide-react';
+import { Leaf, Recycle, ShieldAlert, BarChart3, AlertTriangle } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
 
 const COLORS = ['#00C853', '#22d3ee', '#ef4444', '#94a3b8'];
 
 export default function Dashboard() {
-  const { data: scans = [], isLoading } = useQuery({
+  const { data: scans = [], isLoading, isError, error } = useQuery({
     queryKey: ['scan_results'],
     queryFn: () => base44.entities.ScanResult.list('-created_date', 100),
+    retry: 1,
   });
 
   const totalScans = scans.length;
@@ -67,6 +68,29 @@ export default function Dashboard() {
         <div className="flex justify-center py-20">
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#00C853]"></div>
         </div>
+      ) : isError ? (
+        <Card className="glass-card border-none">
+          <CardContent className="p-10 flex flex-col items-center justify-center text-center space-y-4">
+            <div className="w-16 h-16 rounded-full bg-red-400/10 flex items-center justify-center">
+              <AlertTriangle className="w-8 h-8 text-red-400" />
+            </div>
+            <h3 className="text-xl font-semibold text-white">Unable to Load Data</h3>
+            <p className="text-slate-400 max-w-md">
+              {error?.message || 'Could not fetch scan results. The API may be unavailable or misconfigured.'}
+            </p>
+            <p className="text-slate-500 text-sm">Start scanning items to populate your dashboard.</p>
+          </CardContent>
+        </Card>
+      ) : totalScans === 0 ? (
+        <Card className="glass-card border-none">
+          <CardContent className="p-10 flex flex-col items-center justify-center text-center space-y-4">
+            <div className="w-16 h-16 rounded-full bg-[#00C853]/10 flex items-center justify-center">
+              <BarChart3 className="w-8 h-8 text-[#00C853]" />
+            </div>
+            <h3 className="text-xl font-semibold text-white">No Scans Yet</h3>
+            <p className="text-slate-400 max-w-md">Use the AI Scanner to analyze waste items and your dashboard will populate automatically.</p>
+          </CardContent>
+        </Card>
       ) : (
         <>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -116,8 +140,11 @@ export default function Dashboard() {
                           ))}
                         </Pie>
                         <Tooltip 
-                          contentStyle={{ backgroundColor: '#1e293b', border: 'none', borderRadius: '8px', color: '#fff' }}
+                          contentStyle={{ backgroundColor: '#1e293b', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', color: '#fff' }}
                           itemStyle={{ color: '#fff' }}
+                        />
+                        <Legend 
+                          wrapperStyle={{ color: '#94a3b8', fontSize: '13px' }}
                         />
                       </PieChart>
                     </ResponsiveContainer>
@@ -141,7 +168,7 @@ export default function Dashboard() {
                       <YAxis stroke="#94a3b8" allowDecimals={false} />
                       <Tooltip 
                         cursor={{ fill: '#334155', opacity: 0.4 }}
-                        contentStyle={{ backgroundColor: '#1e293b', border: 'none', borderRadius: '8px', color: '#fff' }}
+                        contentStyle={{ backgroundColor: '#1e293b', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', color: '#fff' }}
                       />
                       <Bar dataKey="scans" fill="#00C853" radius={[4, 4, 0, 0]} />
                     </BarChart>
