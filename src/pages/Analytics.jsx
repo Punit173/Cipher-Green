@@ -10,10 +10,13 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 export default function Analytics() {
   const [filter, setFilter] = useState('all');
 
-  const { data: scans = [], isLoading } = useQuery({
+  const { data: rawScans, isLoading } = useQuery({
     queryKey: ['scan_results_analytics'],
     queryFn: () => base44.entities.ScanResult.list('-created_date', 500),
   });
+
+  // Ensure scans is always an array — API may return an object like { results: [...] }
+  const scans = Array.isArray(rawScans) ? rawScans : Array.isArray(rawScans?.results) ? rawScans.results : [];
 
   const filteredScans = filter === 'all' ? scans : scans.filter(s => s.category === filter);
 
