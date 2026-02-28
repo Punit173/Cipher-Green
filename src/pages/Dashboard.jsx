@@ -9,11 +9,14 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 const COLORS = ['#00C853', '#22d3ee', '#ef4444', '#94a3b8'];
 
 export default function Dashboard() {
-  const { data: scans = [], isLoading, isError, error } = useQuery({
+  const { data: rawScans, isLoading, isError, error } = useQuery({
     queryKey: ['scan_results'],
     queryFn: () => base44.entities.ScanResult.list('-created_date', 100),
     retry: 1,
   });
+
+  // Ensure scans is always an array — API may return an object like { results: [...] }
+  const scans = Array.isArray(rawScans) ? rawScans : Array.isArray(rawScans?.results) ? rawScans.results : [];
 
   const totalScans = scans.length;
   const totalCo2 = scans.reduce((acc, scan) => acc + (scan.carbon_saved || 0), 0).toFixed(2);
